@@ -70,6 +70,9 @@ class Ball8 extends Plugin implements IModule {
 	}
 
 	public async init() {
+		if(!$modLoader.isPendingInitialization(this.signature)) {
+			throw new Error("This module is not pending initialization");
+		}
 		const messagesFlowsKeeper = $snowball.modLoader.findKeeper<MessagesFlows>("snowball.core_features.messageflows");
 		if(!messagesFlowsKeeper) { throw new Error("`MessageFlows` not found!"); }
 
@@ -144,6 +147,9 @@ class Ball8 extends Plugin implements IModule {
 	}
 
 	public async unload() {
+		if(!$modLoader.isPendingUnload(this.signature)) {
+			throw new Error("This module is not pending unload");
+		}
 		this.unhandleEvents();
 		return true;
 	}
