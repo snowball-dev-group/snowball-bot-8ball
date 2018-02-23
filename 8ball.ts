@@ -63,6 +63,7 @@ class Ball8 extends Plugin implements IModule {
 	};
 	categories = Object.keys(this.responses);
 	flowHandler: IPublicFlowUnit;
+	i18nKeys: string[];
 
 	constructor() {
 		super({}, true);
@@ -73,8 +74,11 @@ class Ball8 extends Plugin implements IModule {
 		if(!$modLoader.isPendingInitialization(this.signature)) {
 			throw new Error("This module is not pending initialization");
 		}
+
 		const messagesFlowsKeeper = $snowball.modLoader.findKeeper<MessagesFlows>("snowball.core_features.messageflows");
 		if(!messagesFlowsKeeper) { throw new Error("`MessageFlows` not found!"); }
+
+		this.i18nKeys = await $localizer.extendLanguages(await $localizer.directoryToLanguagesTree([__dirname, "i18n"]));
 
 		messagesFlowsKeeper.onInit((flowsMan: MessagesFlows) => {
 			return this.flowHandler = flowsMan.watchForMessages((ctx) => this.onMessage(ctx), "8ball", {
@@ -150,6 +154,7 @@ class Ball8 extends Plugin implements IModule {
 		if(!$modLoader.isPendingUnload(this.signature)) {
 			throw new Error("This module is not pending unload");
 		}
+		if(this.i18nKeys) { $localizer.pruneLanguages(this.i18nKeys); }
 		this.unhandleEvents();
 		return true;
 	}
