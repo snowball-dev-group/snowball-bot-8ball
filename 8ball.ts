@@ -69,7 +69,7 @@ class Ball8 extends Plugin implements IModule {
 		this.log("ok", "8Ball is loaded");
 	}
 
-	async init() {
+	public async init() {
 		const messagesFlowsKeeper = $snowball.modLoader.findKeeper<MessagesFlows>("snowball.core_features.messageflows");
 		if(!messagesFlowsKeeper) { throw new Error("`MessageFlows` not found!"); }
 
@@ -143,7 +143,7 @@ class Ball8 extends Plugin implements IModule {
 		}
 	}
 
-	async unload() {
+	public async unload() {
 		this.unhandleEvents();
 		return true;
 	}
