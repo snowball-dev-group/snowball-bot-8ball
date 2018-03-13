@@ -71,12 +71,12 @@ class Ball8 extends Plugin implements IModule {
 	}
 
 	public async init() {
-		if(!$modLoader.isPendingInitialization(this.signature)) {
+		if (!$modLoader.isPendingInitialization(this.signature)) {
 			throw new Error("This module is not pending initialization");
 		}
 
 		const messagesFlowsKeeper = $snowball.modLoader.findKeeper<MessagesFlows>("snowball.core_features.messageflows");
-		if(!messagesFlowsKeeper) { throw new Error("`MessageFlows` not found!"); }
+		if (!messagesFlowsKeeper) { throw new Error("`MessageFlows` not found!"); }
 
 		this.i18nKeys = await $localizer.extendLanguages(await $localizer.directoryToLanguagesTree([__dirname, "i18n"]));
 
@@ -107,7 +107,7 @@ class Ball8 extends Plugin implements IModule {
 					clearFooter: true
 				})
 			})) as Message;
-		} catch(err) {
+		} catch (err) {
 			this.log("err", "Damn! 8Ball can't send message", err);
 			$snowball.captureException(err, {
 				extra: { channelId: msg.channel.id }
@@ -138,12 +138,12 @@ class Ball8 extends Plugin implements IModule {
 					}
 				})
 			});
-		} catch(err) {
+		} catch (err) {
 			$snowball.captureException(err, { extra: { id: message.id } });
 			this.log("err", "Bummer! We can't update message, trying to delete our message", err);
 			try {
 				await message.delete();
-			} catch(err) {
+			} catch (err) {
 				this.log("err", "Message also can't be removed...", err);
 				$snowball.captureException(err, { extra: { id: message.id } });
 			}
@@ -151,10 +151,10 @@ class Ball8 extends Plugin implements IModule {
 	}
 
 	public async unload() {
-		if(!$modLoader.isPendingUnload(this.signature)) {
+		if (!$modLoader.isPendingUnload(this.signature)) {
 			throw new Error("This module is not pending unload");
 		}
-		if(this.i18nKeys) { $localizer.pruneLanguages(this.i18nKeys); }
+		if (this.i18nKeys) { $localizer.pruneLanguages(this.i18nKeys); }
 		this.unhandleEvents();
 		return true;
 	}
