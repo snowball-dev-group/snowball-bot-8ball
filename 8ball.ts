@@ -98,7 +98,7 @@ class Ball8 extends Plugin implements IModule {
 
 		let message: Message;
 		try {
-			message = (await msg.channel.send("", {
+			message = <Message> await msg.channel.send("", {
 				embed: await generateLocalizedEmbed(EmbedType.Empty, i18nTarget, "8BALL_THINKING", {
 					author: {
 						name: localName,
@@ -106,7 +106,7 @@ class Ball8 extends Plugin implements IModule {
 					},
 					clearFooter: true
 				})
-			})) as Message;
+			});
 		} catch (err) {
 			this.log("err", "Damn! 8Ball can't send message", err);
 			$snowball.captureException(err, {
@@ -132,7 +132,7 @@ class Ball8 extends Plugin implements IModule {
 					color: category.color,
 					footer: {
 						text: await localizeForUser(i18nTarget, "8BALL_INREPLY", {
-							username: i18nTarget instanceof GuildMember ? i18nTarget.displayName : (i18nTarget as User).username
+							username: i18nTarget instanceof GuildMember ? i18nTarget.displayName : (<User> i18nTarget).username
 						}),
 						icon_url: actualUser.displayAvatarURL({ format: "webp", size: 128 })
 					}
