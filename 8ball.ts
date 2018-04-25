@@ -30,8 +30,8 @@ class Ball8 extends Plugin implements IModule {
 		return "snowball.features.8ball";
 	}
 
-	log = getLogger("8Ball");
-	responses: IHashMap<I8BallResponsesCategory> = {
+	private readonly _log = getLogger("8Ball");
+	private readonly _responses: IHashMap<I8BallResponsesCategory> = {
 		"affirmative": {
 			color: 0x2196F3,
 			variants: [
@@ -61,13 +61,13 @@ class Ball8 extends Plugin implements IModule {
 			]
 		}
 	};
-	categories = Object.keys(this.responses);
-	flowHandler: IPublicFlowUnit;
-	i18nKeys: string[];
+	private readonly _categories = Object.keys(this._responses);
+	private _flowHandler: IPublicFlowUnit;
+	private _i18nKeys: string[];
 
 	constructor() {
 		super({}, true);
-		this.log("ok", "8Ball is loaded");
+		this._log("ok", "8Ball is loading...");
 	}
 
 	public async init() {
@@ -78,10 +78,10 @@ class Ball8 extends Plugin implements IModule {
 		const messagesFlowsKeeper = $snowball.modLoader.findKeeper<MessagesFlows>("snowball.core_features.messageflows");
 		if (!messagesFlowsKeeper) { throw new Error("`MessageFlows` not found!"); }
 
-		this.i18nKeys = await $localizer.extendLanguages(await $localizer.directoryToLanguagesTree([__dirname, "i18n"]));
+		this._i18nKeys = await $localizer.extendLanguages(await $localizer.directoryToLanguagesTree([__dirname, "i18n"]));
 
 		messagesFlowsKeeper.onInit((flowsMan: MessagesFlows) => {
-			return this.flowHandler = flowsMan.watchForMessages((ctx) => this.onMessage(ctx), "8ball", {
+			return this._flowHandler = flowsMan.watchForMessages((ctx) => this.onMessage(ctx), "8ball", {
 				timeoutHandler: 10000
 			});
 		});
@@ -108,7 +108,7 @@ class Ball8 extends Plugin implements IModule {
 				})
 			});
 		} catch (err) {
-			this.log("err", "Damn! 8Ball can't send message", err);
+			this._log("err", "Damn! 8Ball can't send message", err);
 			$snowball.captureException(err, {
 				extra: { channelId: msg.channel.id }
 			});
@@ -117,8 +117,8 @@ class Ball8 extends Plugin implements IModule {
 
 		await sleep(random.integer(1500, 3000));
 
-		const categoryName = random.pick<string>(this.categories);
-		const category = this.responses[categoryName];
+		const categoryName = random.pick<string>(this._categories);
+		const category = this._responses[categoryName];
 
 		const answer = random.pick<string>(category.variants);
 
@@ -140,11 +140,11 @@ class Ball8 extends Plugin implements IModule {
 			});
 		} catch (err) {
 			$snowball.captureException(err, { extra: { id: message.id } });
-			this.log("err", "Bummer! We can't update message, trying to delete our message", err);
+			this._log("err", "Bummer! We can't update message, trying to delete our message", err);
 			try {
 				await message.delete();
 			} catch (err) {
-				this.log("err", "Message also can't be removed...", err);
+				this._log("err", "Message also can't be removed...", err);
 				$snowball.captureException(err, { extra: { id: message.id } });
 			}
 		}
@@ -154,7 +154,7 @@ class Ball8 extends Plugin implements IModule {
 		if (!$modLoader.isPendingUnload(this.signature)) {
 			throw new Error("This module is not pending unload");
 		}
-		if (this.i18nKeys) { $localizer.pruneLanguages(this.i18nKeys); }
+		if (this._i18nKeys) { $localizer.pruneLanguages(this._i18nKeys); }
 		this.unhandleEvents();
 		return true;
 	}
