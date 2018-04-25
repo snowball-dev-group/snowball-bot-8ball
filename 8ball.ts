@@ -1,13 +1,13 @@
-import { IPublicFlowUnit, IMessageFlowContext, default as MessagesFlows } from "../cores/messagesFlows";
-import { IModule } from "../../types/ModuleLoader";
-import { Plugin } from "../plugin";
-import { Message, GuildMember, User } from "discord.js";
+import { IPublicFlowUnit, IMessageFlowContext, default as MessagesFlows } from "@cogs/cores/messagesFlows";
+import { IModule } from "@sb-types/ModuleLoader";
+import { Plugin } from "@cogs/plugin";
+import { Message, GuildMember } from "discord.js";
 import * as Random from "random-js";
 import * as getLogger from "loggy";
-import { EmbedType, sleep } from "../utils/utils";
+import { EmbedType, sleep, getMessageMemberOrAuthor } from "@utils/utils";
 import { command } from "../utils/help";
-import { generateLocalizedEmbed, localizeForUser } from "../utils/ez-i18n";
-import { IHashMap } from "../../types/Types";
+import { generateLocalizedEmbed, localizeForUser } from "@utils/ez-i18n";
+import { IHashMap } from "@sb-types/Types";
 
 const ICONS = {
 	THINKING: "https://i.imgur.com/hIuSpIl.png",
