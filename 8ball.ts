@@ -89,7 +89,10 @@ class Ball8 extends Plugin implements IModule {
 
 	private async onMessage(ctx: IMessageFlowContext) {
 		const msg = ctx.message;
-		const i18nTarget = msg.member || msg.author;
+
+		const i18nTarget = await getMessageMemberOrAuthor(msg);
+		if (!i18nTarget) { return; }
+
 		const actualUser = i18nTarget instanceof GuildMember ? i18nTarget.user : i18nTarget;
 
 		const random = new Random(Random.engines.mt19937().autoSeed());
@@ -132,7 +135,7 @@ class Ball8 extends Plugin implements IModule {
 					color: category.color,
 					footer: {
 						text: await localizeForUser(i18nTarget, "8BALL_INREPLY", {
-							username: i18nTarget instanceof GuildMember ? i18nTarget.displayName : (<User> i18nTarget).username
+							username: i18nTarget instanceof GuildMember ? i18nTarget.displayName : i18nTarget.username
 						}),
 						icon_url: actualUser.displayAvatarURL({ format: "webp", size: 128 })
 					}
