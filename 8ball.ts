@@ -1,12 +1,12 @@
-import { IPublicFlowUnit, IMessageFlowContext, default as MessagesFlows } from "@cogs/cores/messagesFlows";
-import { IModule } from "@sb-types/ModuleLoader";
-import { Plugin } from "@cogs/plugin";
-import { Message, GuildMember } from "discord.js";
+import * as MessagesFlows from "@cogs/cores/messagesFlows";
 import * as Random from "random-js";
 import * as getLogger from "loggy";
-import { EmbedType, sleep, getMessageMemberOrAuthor } from "@utils/utils";
-import { command } from "../utils/help";
-import { generateLocalizedEmbed, localizeForUser } from "@utils/ez-i18n";
+import * as utils from "@utils/utils";
+import * as i18n from "@utils/ez-i18n";
+import { IModule } from "@sb-types/ModuleLoader/Interfaces";
+import { Plugin } from "@cogs/plugin";
+import { Message, GuildMember } from "discord.js";
+import { command } from "@utils/help";
 import { IHashMap } from "@sb-types/Types";
 
 const ICONS = {
@@ -62,7 +62,7 @@ class Ball8 extends Plugin implements IModule {
 		}
 	};
 	private readonly _categories = Object.keys(this._responses);
-	private _flowHandler: IPublicFlowUnit;
+	private _flowHandler: MessagesFlows.IPublicFlowCommand;
 	private _i18nKeys: string[];
 
 	constructor() {
@@ -75,34 +75,39 @@ class Ball8 extends Plugin implements IModule {
 			throw new Error("This module is not pending initialization");
 		}
 
-		const messagesFlowsKeeper = $snowball.modLoader.findKeeper<MessagesFlows>("snowball.core_features.messageflows");
+		const messagesFlowsKeeper = $snowball.modLoader.findKeeper<MessagesFlows.MessagesFlows>("snowball.core_features.messageflows");
 		if (!messagesFlowsKeeper) { throw new Error("`MessageFlows` not found!"); }
 
-		this._i18nKeys = await $localizer.extendLanguages(await $localizer.directoryToLanguagesTree([__dirname, "i18n"]));
+		this._i18nKeys = await $localizer.extendLanguages(
+			await $localizer.fileLoader.directoryToLanguagesTree(
+				[__dirname, "i18n"]
+			)
+		);
 
-		messagesFlowsKeeper.onInit((flowsMan: MessagesFlows) => {
-			return this._flowHandler = flowsMan.watchForMessages((ctx) => this.onMessage(ctx), "8ball", {
-				timeoutHandler: 10000
-			});
+		messagesFlowsKeeper.onInit((flowsMan: MessagesFlows.default) => {
+			return this._flowHandler = flowsMan.watchForCommands(
+				(ctx) => this.onMessage(ctx),
+				"8ball"
+			);
 		});
 	}
 
-	private async onMessage(ctx: IMessageFlowContext) {
+	private async onMessage(ctx: MessagesFlows.IMessageFlowContext) {
 		const msg = ctx.message;
 
-		const i18nTarget = await getMessageMemberOrAuthor(msg);
+		const i18nTarget = await utils.getMessageMemberOrAuthor(msg);
 		if (!i18nTarget) { return; }
 
 		const actualUser = i18nTarget instanceof GuildMember ? i18nTarget.user : i18nTarget;
 
 		const random = new Random(Random.engines.mt19937().autoSeed());
 
-		const localName = await localizeForUser(i18nTarget, "8BALL_NAME");
+		const localName = await i18n.localizeForUser(i18nTarget, "8BALL_NAME");
 
 		let message: Message;
 		try {
-			message = <Message> await msg.channel.send("", {
-				embed: await generateLocalizedEmbed(EmbedType.Empty, i18nTarget, "8BALL_THINKING", {
+			message = <Message> await msg.channel.send({
+				embed: await i18n.generateLocalizedEmbed(utils.EmbedType.Empty, i18nTarget, "8BALL_THINKING", {
 					author: {
 						name: localName,
 						icon_url: ICONS.THINKING
@@ -115,10 +120,11 @@ class Ball8 extends Plugin implements IModule {
 			$snowball.captureException(err, {
 				extra: { channelId: msg.channel.id }
 			});
+
 			return;
 		}
 
-		await sleep(random.integer(1500, 3000));
+		await utils.sleep(random.integer(1500, 3000));
 
 		const categoryName = random.pick<string>(this._categories);
 		const category = this._responses[categoryName];
@@ -127,14 +133,14 @@ class Ball8 extends Plugin implements IModule {
 
 		try {
 			await message.edit("", {
-				embed: await generateLocalizedEmbed(EmbedType.Empty, i18nTarget, answer, {
+				embed: await i18n.generateLocalizedEmbed(utils.EmbedType.Empty, i18nTarget, answer, {
 					author: {
 						icon_url: ICONS.RESPONSE,
 						name: localName
 					},
 					color: category.color,
 					footer: {
-						text: await localizeForUser(i18nTarget, "8BALL_INREPLY", {
+						text: await i18n.localizeForUser(i18nTarget, "8BALL_INREPLY", {
 							username: i18nTarget instanceof GuildMember ? i18nTarget.displayName : i18nTarget.username
 						}),
 						icon_url: actualUser.displayAvatarURL({ format: "webp", size: 128 })
@@ -143,11 +149,13 @@ class Ball8 extends Plugin implements IModule {
 			});
 		} catch (err) {
 			$snowball.captureException(err, { extra: { id: message.id } });
-			this._log("err", "Bummer! We can't update message, trying to delete our message", err);
+
+			this._log("err", "Bummer! We cannot update the message, trying to delete our message", err);
+
 			try {
 				await message.delete();
 			} catch (err) {
-				this._log("err", "Message also can't be removed...", err);
+				this._log("err", "Message also cannot be removed...", err);
 				$snowball.captureException(err, { extra: { id: message.id } });
 			}
 		}
@@ -158,7 +166,9 @@ class Ball8 extends Plugin implements IModule {
 			throw new Error("This module is not pending unload");
 		}
 		if (this._i18nKeys) { $localizer.pruneLanguages(this._i18nKeys); }
+
 		this.unhandleEvents();
+
 		return true;
 	}
 }
