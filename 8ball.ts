@@ -165,6 +165,11 @@ class Ball8 extends Plugin implements IModule {
 		if (!$modLoader.isPendingUnload(this.signature)) {
 			throw new Error("This module is not pending unload");
 		}
+
+		if (this._flowHandler) {
+			this._flowHandler.unhandle();
+		}
+
 		if (this._i18nKeys) { $localizer.pruneLanguages(this._i18nKeys); }
 
 		this.unhandleEvents();
