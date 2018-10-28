@@ -65,7 +65,7 @@ class Ball8 extends Plugin implements IModule {
 
 	private readonly _log = getLogger("8Ball");
 	private _flowHandler: MessagesFlows.IPublicFlowCommand;
-	private _i18nKeys: string[];
+	private _i18nRemove: i18n.ExtensionAssignUnhandleFunction;
 
 	constructor() {
 		super({}, true);
@@ -77,13 +77,17 @@ class Ball8 extends Plugin implements IModule {
 			throw new Error("This module is not pending initialization");
 		}
 
-		const messagesFlowsKeeper = $snowball.modLoader.findKeeper<MessagesFlows.MessagesFlows>("snowball.core_features.messageflows");
-		if (!messagesFlowsKeeper) { throw new Error("`MessageFlows` not found!"); }
+		const messagesFlowsKeeper = $snowball.modLoader.findKeeper<MessagesFlows.MessagesFlows>(
+			"snowball.core_features.messageflows"
+		);
 
-		this._i18nKeys = await $localizer.extendLanguages(
-			await $localizer.fileLoader.directoryToLanguagesTree(
-				[__dirname, "i18n"]
-			)
+		if (!messagesFlowsKeeper) {
+			throw new Error("`MessageFlows` not found!");
+		}
+
+		this._i18nRemove = await i18n.extendAndAssign(
+			[ __dirname, "i18n" ],
+			this.signature
 		);
 
 		messagesFlowsKeeper.onInit((flowsMan: MessagesFlows.default) => {
@@ -172,7 +176,9 @@ class Ball8 extends Plugin implements IModule {
 			this._flowHandler.unhandle();
 		}
 
-		if (this._i18nKeys) { $localizer.pruneLanguages(this._i18nKeys); }
+		if (this._i18nRemove) {
+			this._i18nRemove();
+		}
 
 		this.unhandleEvents();
 
