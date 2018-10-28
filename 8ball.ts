@@ -19,6 +19,39 @@ interface I8BallResponsesCategory {
 	variants: string[];
 }
 
+const RESPONSES: IHashMap<I8BallResponsesCategory> = {
+	"affirmative": {
+		color: 0x2196F3,
+		variants: [
+			"8BALL_ANSWER_CERTAIN", "8BALL_ANSWER_DECIDEDLY", "8BALL_ANSWER_WODOUBT",
+			"8BALL_ANSWER_DEFINITELY", "8BALL_ANSWER_RELY"
+		]
+	},
+	"non-committal": {
+		color: 0x4CAF50,
+		variants: [
+			"8BALL_ANSWER_NC_PROB", "8BALL_ANSWER_NC_MOSTLIKELY", "8BALL_ANSWER_NC_OUTLOOK",
+			"8BALL_ANSWER_NC_SIGNS", "8BALL_ANSWER_NC_YES"
+		]
+	},
+	"neutral": {
+		color: 0xFFC107,
+		variants: [
+			"8BALL_ANSWER_NEUTRAL_HAZY", "8BALL_ANSWER_NEUTRAL_LATER", "8BALL_ANSWER_NEUTRAL_NOT",
+			"8BALL_ANSWER_NEUTRAL_CANTPREDICT", "8BALL_ANSWER_NEUTRAL_CONCENTRATE"
+		]
+	},
+	"negative": {
+		color: 0xe53935,
+		variants: [
+			"8BALL_ANSWER_NEGATIVE_DONT", "8BALL_ANSWER_NEGATIVE_MYREPLY", "8BALL_ANSWER_NEGATIVE_SOURCES",
+			"8BALL_ANSWER_NEGATIVE_OUTLOOK", "8BALL_ANSWER_NEGATIVE_DOUBTFUL"
+		]
+	}
+};
+
+const CATEGORIES = Object.keys(RESPONSES);
+
 @command("FUN", "8ball", "loc:8BALL_META_DEFAULT", {
 	"loc:8BALL_META_DEFAULT_ARG0": {
 		optional: false,
@@ -31,37 +64,6 @@ class Ball8 extends Plugin implements IModule {
 	}
 
 	private readonly _log = getLogger("8Ball");
-	private readonly _responses: IHashMap<I8BallResponsesCategory> = {
-		"affirmative": {
-			color: 0x2196F3,
-			variants: [
-				"8BALL_ANSWER_CERTAIN", "8BALL_ANSWER_DECIDEDLY", "8BALL_ANSWER_WODOUBT",
-				"8BALL_ANSWER_DEFINITELY", "8BALL_ANSWER_RELY"
-			]
-		},
-		"non-committal": {
-			color: 0x4CAF50,
-			variants: [
-				"8BALL_ANSWER_NC_PROB", "8BALL_ANSWER_NC_MOSTLIKELY", "8BALL_ANSWER_NC_OUTLOOK",
-				"8BALL_ANSWER_NC_SIGNS", "8BALL_ANSWER_NC_YES"
-			]
-		},
-		"neutral": {
-			color: 0xFFC107,
-			variants: [
-				"8BALL_ANSWER_NEUTRAL_HAZY", "8BALL_ANSWER_NEUTRAL_LATER", "8BALL_ANSWER_NEUTRAL_NOT",
-				"8BALL_ANSWER_NEUTRAL_CANTPREDICT", "8BALL_ANSWER_NEUTRAL_CONCENTRATE"
-			]
-		},
-		"negative": {
-			color: 0xe53935,
-			variants: [
-				"8BALL_ANSWER_NEGATIVE_DONT", "8BALL_ANSWER_NEGATIVE_MYREPLY", "8BALL_ANSWER_NEGATIVE_SOURCES",
-				"8BALL_ANSWER_NEGATIVE_OUTLOOK", "8BALL_ANSWER_NEGATIVE_DOUBTFUL"
-			]
-		}
-	};
-	private readonly _categories = Object.keys(this._responses);
 	private _flowHandler: MessagesFlows.IPublicFlowCommand;
 	private _i18nKeys: string[];
 
@@ -126,8 +128,8 @@ class Ball8 extends Plugin implements IModule {
 
 		await utils.sleep(random.integer(1500, 3000));
 
-		const categoryName = random.pick<string>(this._categories);
-		const category = this._responses[categoryName];
+		const categoryName = random.pick<string>(CATEGORIES);
+		const category = RESPONSES[categoryName];
 
 		const answer = random.pick<string>(category.variants);
 
